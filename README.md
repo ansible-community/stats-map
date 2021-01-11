@@ -67,7 +67,3 @@ username for exclusion.
 ## TODO
 
 Everything. Help welcome :)
-
-## License
-
-GPL3

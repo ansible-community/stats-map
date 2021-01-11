@@ -1,17 +1,22 @@
 Package: AnsibleMap
-Title: An Amazing Shiny App
+Title: Ansible Contributor Map
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
-           role = c("aut", "cre"),
-           email = "your@email.com")
-Description: What the package does (one paragraph).
-License: What license is it under?
+Authors@R: person('Greg', 'Sutcliffe', email = 'gsutclif@redhat.com', role = c('cre', 'aut'))
+Description: A map containing Meetup and GitHub data for Ansible Contributors.
+License: GPL-3
 Imports: 
     config,
     golem,
-    shiny
+    shiny,
+    processx,
+    attempt,
+    DT,
+    glue,
+    htmltools
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+URL: https://github.com/ansible-community/stats-map
+BugReports: https://github.com/ansible-community/stats-map/issues
+Suggests: 
+    testthat
