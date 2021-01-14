@@ -7,24 +7,21 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList tags
-mod_main_ui <- function(id){
+mainUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h1('Yay')
+    mapUI(ns("map_1"))
   )
 }
 
 #' main Server Function
 #'
 #' @noRd
-mod_main_server <- function(input, output, session){
-  ns <- session$ns
+mainServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
 
+    # init stuff goes here
+
+    mapServer("map_1")
+  })
 }
-
-## To be copied in the UI
-# mod_main_ui("main_ui_1")
-
-## To be copied in the server
-# callModule(mod_main_server, "main_ui_1")
-

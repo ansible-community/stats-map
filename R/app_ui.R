@@ -26,7 +26,7 @@ ui_header <- function() {
 #' @noRd
 ui_body <- function() {
   dashboardBody(
-    mod_main_ui("main_ui_1")
+    mainUI("main_1")
   )
 }
 
