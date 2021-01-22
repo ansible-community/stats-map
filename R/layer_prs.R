@@ -1,29 +1,14 @@
-#' Shiny module for processing the PR map data, which
-#' can be returned to Leaflet
-
-#' layer_prs UI Function
-#'
-#' @description UI for the PR layer - currently no UI needed
-#'
-#' @param id Internal parameters for {shiny}.
+#' layer_prs - Leaflet helper for rendering the PR layer, doesn't
+#' need to be a Shiny module, as it's not reactive - the reactivity
+#' comes from the "map" module & leafletProxy() call
 #'
 #' @noRd
-layer_prsUI <- function(id) {
-  ns <- NS(id)
-}
+layer_prs <- function(map, pr_data) {
 
-#' layer_prs Server Function
-#'
-#' @noRd
-layer_prsServer <- function(id, map) {
-  moduleServer(id, function(input, output, session) {
-
-    users_map <- data_prsServer("map")
-
-    # Uses the `tmap` World shapefile
+    # Uses the `tmap` World shapefiles
     data('World',package = 'tmap')
 
-    world <- merge(World, users_map, by.x = 'name', by.y = 'country')
+    world <- merge(World, pr_data, by.x = 'name', by.y = 'country')
     world <- sf::st_transform(world,'+init=epsg:4326')
 
     # TODO This bins are hardcoded, that's going to break at some point...
@@ -36,29 +21,29 @@ layer_prsServer <- function(id, map) {
       world$name, world$prs
     ) %>% lapply(htmltools::HTML)
 
-    map %>%
-      addPolygons(
-        data = world,
-        group = 'PRs',
-        fillColor = ~pal(prs),
-        weight = 2,
-        opacity = 1,
-        color = "grey90",
-        dashArray = "3",
-        fillOpacity = 0.5,
-        highlight = highlightOptions(
-          weight = 1,
-          color = "#666",
-          dashArray = "",
-          fillOpacity = 0.7,
-          bringToFront = FALSE),
-        label = labels,
-        labelOptions = labelOptions(
-          style = list("font-weight" = "normal", padding = "3px 8px"),
-          textsize = "15px",
-          offset = c(30,0),
-          direction = "right")
-      ) %>%
+    addPolygons(
+      map = map,
+      data = world,
+      group = 'PRs',
+      fillColor = ~pal(prs),
+      weight = 2,
+      opacity = 1,
+      color = "grey90",
+      dashArray = "3",
+      fillOpacity = 0.5,
+      highlight = highlightOptions(
+        weight = 1,
+        color = "#666",
+        dashArray = "",
+        fillOpacity = 0.7,
+        bringToFront = FALSE),
+      label = labels,
+      labelOptions = labelOptions(
+        style = list("font-weight" = "normal", padding = "3px 8px"),
+        textsize = "15px",
+        offset = c(30,0),
+        direction = "right")
+    ) %>%
       addLegend(
         data = world,
         pal = pal,
@@ -67,10 +52,4 @@ layer_prsServer <- function(id, map) {
         opacity = 0.7,
         title = "PRs",
         position = "bottomright")
-  })
-}
-
-# For testing
-layer_prsApp <- function() {
-  # Not sure how to test this yet!
 }

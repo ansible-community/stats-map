@@ -18,20 +18,22 @@ data_prsUI <- function(id) {
 data_prsServer <- function(id) {
   moduleServer(id, function(input, output, session) {
 
-    # Uses the `tmap` World shapefile for generating country data
-    # Will be replaced by real data soon
-    data('World',package = 'tmap')
+    # Can some of this be pre-loaded?
+    # Is /tmp sensible? Should it be app-level config?
+    pins::board_register_local(name = 'maps', cache = '/tmp')
 
-    # return value
-    # TODO make live, this is hardcoded random data
-    data.frame(
-      country = World$name,
-      prs = floor(runif(177,0,100))
-    )
+    pins::pin_reactive('users_by_country', 'maps')
   })
 }
 
 # For testing
 data_prsApp <- function() {
-  # Not sure how to test this yet!
+  ui <- fluidPage(
+    tableOutput("data")
+  )
+  server <- function(input, output, session) {
+    data <- data_prsServer("data")
+    output$data <- renderTable(head(data()))
+  }
+  shinyApp(ui, server)
 }

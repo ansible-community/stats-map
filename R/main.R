@@ -20,8 +20,7 @@ mainUI <- function(id) {
 mainServer <- function(id) {
   moduleServer(id, function(input, output, session) {
 
-    # init stuff goes here
-
+    # call modules here
     mapServer("map_1")
   })
 }
