@@ -9,7 +9,7 @@
 mapUI <- function(id) {
   ns <- NS(id)
   tagList(
-    leafletOutput(ns('map'), height = 900)
+    leafletOutput(ns('map'), height = 800)
   )
 }
 
@@ -34,20 +34,34 @@ mapServer <- function(id) {
     setView(0, 25, 2.5) %>%
     addTiles() %>%
     addLayersControl(
-      overlayGroups = c('PRs'),
+      overlayGroups = c('PRs', 'Meetups'),
       position = 'bottomleft',
       options = layersControlOptions(collapsed = FALSE)
     )
 
   moduleServer(id, function(input, output, session) {
 
-    users_map <- data_prsServer("map")
-
+    # First render the map canvas
     output$map <- renderLeaflet(init_map)
+
+    # Map layer modules
+
+    # Users layer ----
+
+    users_map  <- data_prsServer("map")
 
     observeEvent(users_map(), {
       leafletProxy("map", session) %>%
         layer_prs(pr_data = users_map())
+    })
+
+    # Meetup layer ----
+
+    meetup_map <- data_meetupServer("map")
+
+    observeEvent(meetup_map(), {
+      leafletProxy("map", session) %>%
+        layer_meetup(meetup_data = meetup_map())
     })
 
   })
