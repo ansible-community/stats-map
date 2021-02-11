@@ -10,8 +10,11 @@ layer_meetup <- function(map, meetup_data) {
   em = mutate(meetup_data, tooltip2 = paste(sep = '<br/>', tooltip, paste0('Members:',members)))
 
   # update the map
-  addCircleMarkers(
+  clearGroup(
     map = map,
+    group = 'Meetups'
+  ) %>%
+  addCircleMarkers(
     data = em,
     group = 'Meetups',
     popup = ~as.character(tooltip2),
