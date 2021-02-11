@@ -1,0 +1,13 @@
+default:
+  DBUSER: test_user
+  DBPASS: test_pass
+  DBNAME: test_db
+  DBPORT: 27017
+  DBHOST: 127.0.0.1
+
+production:
+  DBUSER: real_user
+  DBPASS: real_pass
+  DBNAME: real_db
+  DBPORT: 27017
+  DBHOST: mongo_host

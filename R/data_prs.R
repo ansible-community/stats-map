@@ -17,13 +17,75 @@ data_prsUI <- function(id) {
 #' @noRd
 data_prsServer <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # We use reactivePoll to query the max timestamp of the db
+    # and refresh the data if it changes
 
-    # Can some of this be pre-loaded?
-    # Is /tmp sensible? Should it be app-level config?
-    pins::board_register_local(name = 'maps', cache = '/tmp')
+    reactivePoll(10000, session,
+      checkFunc = check_mongo_timestamp,
+      valueFunc = get_mongo_data
+    )
 
-    pins::pin_reactive('users_by_country', 'maps')
   })
+}
+
+# Helpers
+
+#' Construct a connection string to Mongo using {config}
+#' @noRd
+#' @importFrom glue glue
+db_con <- function() {
+  config_group <- ifelse(getOption('golem.app.prod'), 'prod', 'default')
+  Sys.setenv(R_CONFIG_ACTIVE = config_group)
+  c <- config::get()
+
+ glue("mongodb://{c$DBUSER}:{c$DBPASS}@{c$DBHOST}:{c$DBPORT}/{c$DBNAME}")
+}
+
+#' @noRd
+#' @import mongolite
+#' @importFrom lubridate ymd_hms
+check_mongo_timestamp <- function() {
+  mongo(url = db_con(), collection = 'users')$find(
+    query = '{}',
+    fields = '{"_id":0, "updated_at":1}',
+    sort = '{"updated_at": -1}',
+    limit = 1
+  ) %>% pull(1) %>% ymd_hms()
+}
+
+#' @noRd
+#' @import dplyr
+#' @importFrom lubridate ymd_hms
+get_mongo_data <- function() {
+  users <- mongo(url = db_con(), collection = 'users')$find(
+    query  = '{"country": {"$ne": null} }',
+    fields = '{"country":1}')
+
+  months = as.integer(12) # make a control
+  # mapreduce?
+  issues <- mongo(url = db_con(), collection = 'issues')$find(
+    query = '{}',
+    fields = '{"author.login":1, "createdAt":1}') %>%
+    mutate(
+      createdAt <- ymd_hms(createdAt)
+    ) %>%
+    filter(createdAt > Sys.Date() - months(months))
+
+  pulls <- mongo(url = db_con(), collection = 'pulls')$find(
+    query = '{}',
+    fields = '{"author.login":1, "createdAt":1}') %>%
+    mutate(
+      createdAt <- ymd_hms(createdAt)
+    ) %>%
+    filter(createdAt > Sys.Date() - months(months))
+
+  bind_rows(
+    issues %>% mutate(type = 'issue'),
+    pulls  %>% mutate(type = 'pull')
+  ) %>%
+    mutate(author = author$login) %>%
+    left_join(users,by = c('author' = '_id')) %>%
+    count(country, sort= T, name = 'prs')
 }
 
 # For testing
