@@ -34,7 +34,8 @@ data_prsServer <- function(id) {
 #' @noRd
 #' @importFrom glue glue
 db_con <- function() {
-  config_group <- ifelse(getOption('golem.app.prod'), 'prod', 'default')
+  # Dev sets this false, otherwise it might be TRUE or NULL
+  config_group <- ifelse(isFALSE(getOption('golem.app.prod')), 'default', 'production')
   Sys.setenv(R_CONFIG_ACTIVE = config_group)
   c <- config::get()
 
@@ -86,6 +87,23 @@ get_mongo_data <- function() {
     mutate(author = author$login) %>%
     left_join(users,by = c('author' = '_id')) %>%
     count(country, sort= T, name = 'prs')
+
+  # um <- users_map %>%
+  #   mutate(country = case_when(
+  #     country == 'United States of America' ~ 'United States',
+  #     country == 'Czech Republic' ~ 'Czech Rep.',
+  #     country == 'Laos' ~ 'Lao PDR',
+  #     country == 'Singapore' ~ 'Malaysia',
+  #     country == 'The Netherlands' ~ 'Netherlands',
+  #     country == 'Palestinian Territory' ~ 'Palestine',
+  #     country == 'Isle of Man' ~ 'United Kingdom',
+  #     country == 'South Korea' ~ 'Korea',
+  #     country == "Côte d'Ivoire" ~ "Cote d'Ivoire",
+  #     TRUE ~ country
+  #   )) %>%
+  #   add_count(country,name='contributors') %>%
+  #   count(country,contributors,wt=prs,name='prs',sort=T)
+
 }
 
 # For testing

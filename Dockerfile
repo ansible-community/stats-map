@@ -2,7 +2,7 @@
 FROM rocker/r-ver:4.0.3
 
 # Deps
-RUN apt-get update && apt-get install -y  gdal-bin git-core libcurl4-openssl-dev libgdal-dev libgeos-dev libgeos++-dev libgit2-dev libicu-dev libpng-dev libsasl2-dev libssl-dev libudunits2-dev libxml2-dev make pandoc pandoc-citeproc && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gdal-bin git-core libcurl4-openssl-dev libgdal-dev libgeos-dev libgeos++-dev libgit2-dev libicu-dev libpng-dev libsasl2-dev libssl-dev libudunits2-dev libxml2-dev make pandoc pandoc-citeproc && rm -rf /var/lib/apt/lists/*
 
 # Setup
 RUN echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site
@@ -13,8 +13,9 @@ WORKDIR /build_zone
 
 # Packages
 # RUN R -e 'install.packages("stringi", force = TRUE)' #why is this needed?
-RUN R -e 'renv::init()'
+RUN rm -rf renv/library
 RUN R -e 'renv::restore()'
+RUN R -e 'devtools::install(dependencies = FALSE)'
 
 # Go!
 EXPOSE 3838

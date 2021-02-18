@@ -9,7 +9,7 @@
 mapUI <- function(id) {
   ns <- NS(id)
   tagList(
-    leafletOutput(ns('map'), height = 800)
+    leafletOutput(ns('map'), height = 770)
   )
 }
 
